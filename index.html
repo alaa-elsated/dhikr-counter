@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>عداد الأذكار</title>
+<style>
+  body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    direction: rtl;
+    text-align: center;
+    padding: 40px;
+    background: #f0f8ff;
+  }
+  h1 {
+    margin-bottom: 20px;
+  }
+  .container {
+    background: #fff;
+    display: inline-block;
+    padding: 25px 40px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    width: 350px;
+  }
+  label, select, input {
+    font-size: 1.1rem;
+    margin: 10px 0;
+  }
+  select, input[type=number] {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border-radius: 6px;
+    border: 1.5px solid #aaa;
+    box-sizing: border-box;
+  }
+  .counter-display {
+    font-size: 2.4rem;
+    margin: 20px 0 10px 0;
+    font-weight: bold;
+    color: #2c3e50;
+  }
+  .dhikr-name {
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #34495e;
+  }
+  button {
+    font-size: 1.2rem;
+    padding: 10px 20px;
+    margin: 5px 8px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background-color: #3498db;
+    color: white;
+    transition: background-color 0.3s ease;
+  }
+  button:hover:not(:disabled) {
+    background-color: #2980b9;
+  }
+  button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+  }
+  .reset-all-btn {
+    background-color: #e74c3c;
+    margin-top: 20px;
+  }
+  .reset-all-btn:hover {
+    background-color: #c0392b;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>عداد الأذكار</h1>
+
+  <label for="dhikr-select">اختر الذكر:</label>
+  <select id="dhikr-select">
+    <option value="سبحان الله">سبحان الله</option>
+    <option value="الحمد لله">الحمد لله</option>
+    <option value="الله أكبر">الله أكبر</option>
+    <option value="لا إله إلا الله">لا إله إلا الله</option>
+    <option value="الصلاة على النبي ﷺ">الصلاة على النبي ﷺ</option>
+  </select>
+
+  <label for="total-count">عدد العدات المطلوبة:</label>
+  <input type="number" id="total-count" value="33" min="1" max="999" />
+
+  <div class="dhikr-name" id="current-dhikr">ذكر: سبحان الله</div>
+  <div class="counter-display" id="counter-display">0 / 33</div>
+
+  <button id="increment-btn">+</button>
+  <button id="decrement-btn">-</button>
+  <button id="reset-btn">إعادة تعيين الذكر الحالي</button>
+
+  <button class="reset-all-btn" id="reset-all-btn">إعادة تعيين كل الأذكار</button>
+</div>
+
+<script>
+  const dhikrSelect = document.getElementById('dhikr-select');
+  const totalCountInput = document.getElementById('total-count');
+  const counterDisplay = document.getElementById('counter-display');
+  const incrementBtn = document.getElementById('increment-btn');
+  const decrementBtn = document.getElementById('decrement-btn');
+  const resetBtn = document.getElementById('reset-btn');
+  const resetAllBtn = document.getElementById('reset-all-btn');
+  const currentDhikrNameDisplay = document.getElementById('current-dhikr');
+
+  let dhikrData = {
+    "سبحان الله": { total: 33, current: 0 },
+    "الحمد لله": { total: 33, current: 0 },
+    "الله أكبر": { total: 33, current: 0 },
+    "لا إله إلا الله": { total: 33, current: 0 },
+    "الصلاة على النبي ﷺ": { total: 100, current: 0 },  // عدد افتراضي مختلف
+  };
+
+  let currentDhikr = dhikrSelect.value;
+
+  function updateDisplay() {
+    const data = dhikrData[currentDhikr];
+    counterDisplay.textContent = `${data.current} / ${data.total}`;
+    currentDhikrNameDisplay.textContent = `ذكر: ${currentDhikr}`;
+    incrementBtn.disabled = data.current >= data.total;
+    decrementBtn.disabled = data.current <= 0;
+    totalCountInput.value = data.total;
+  }
+
+  incrementBtn.addEventListener('click', () => {
+    let data = dhikrData[currentDhikr];
+    if (data.current < data.total) {
+      data.current++;
+      updateDisplay();
+    }
+  });
+
+  decrementBtn.addEventListener('click', () => {
+    let data = dhikrData[currentDhikr];
+    if (data.current > 0) {
+      data.current--;
+      updateDisplay();
+    }
+  });
+
+  resetBtn.addEventListener('click', () => {
+    dhikrData[currentDhikr].current = 0;
+    updateDisplay();
+  });
+
+  resetAllBtn.addEventListener('click', () => {
+    for (const key in dhikrData) {
+      dhikrData[key].current = 0;
+      dhikrData[key].total = (key === "الصلاة على النبي ﷺ") ? 100 : 33;
+    }
+    updateDisplay();
+  });
+
+  dhikrSelect.addEventListener('change', () => {
+    currentDhikr = dhikrSelect.value;
+    totalCountInput.value = dhikrData[currentDhikr].total;
+    updateDisplay();
+  });
+
+  totalCountInput.addEventListener('input', () => {
+    let val = parseInt(totalCountInput.value);
+    if (isNaN(val) || val < 1) {
+      val = 1;
+    } else if (val > 999) {
+      val = 999;
+    }
+    totalCountInput.value = val;
+
+    dhikrData[currentDhikr].total = val;
+
+    if (dhikrData[currentDhikr].current > val) {
+      dhikrData[currentDhikr].current = val;
+    }
+    updateDisplay();
+  });
+
+  updateDisplay();
+</script>
+
+</body>
+</html>
+
+
